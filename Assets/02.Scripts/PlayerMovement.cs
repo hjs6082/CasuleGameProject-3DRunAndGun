@@ -37,7 +37,8 @@ public class PlayerMovement : MonoBehaviour
             Instantiate(bulletPrefab, bulletSpawnPoint.position, Quaternion.identity);
         }
     }
-
+    
+    //플레이어의 방향을 조절
     private void MovePlayer()
     {
         if (Input.GetMouseButton(0))
