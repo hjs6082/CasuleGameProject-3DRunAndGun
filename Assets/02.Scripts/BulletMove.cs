@@ -15,6 +15,7 @@ public class BulletMove : MonoBehaviour
         Destroy(gameObject); // 화면 밖으로 나가면 총알 제거
     }
 
+    // 이부분에 체력 다는 hp바 추가
     private void OnCollisionEnter(Collision collision)
     {
         //Destroy(gameObject); // 물체에 닿으면 총알 제거.
