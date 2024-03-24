@@ -1,15 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    private CompositeDisposable subscriptions = new CompositeDisposable();
+
     [SerializeField] private float limitX;
     [SerializeField] private float sidewaySpeed;
     [SerializeField] private Transform playerModel;
     public GameObject bulletPrefab; // 인스펙터에서 지정할 총알 프리팹
     public Transform bulletSpawnPoint; // 총알이 발사될 위치
-    public float fireRate = 1.0f; // 초당 발사 속도
 
     private float nextFireTime = 0.0f; // 다음 발사 가능 시간
 
@@ -17,15 +20,63 @@ public class PlayerMovement : MonoBehaviour
     private float _finalPos;
     private float _currentPos;
 
+    private void OnEnable()
+    {
+        StartCoroutine(Subscribe());
+    }
+    private IEnumerator Subscribe()
+    {
+        yield return new WaitUntil(() => GameEvents.instance != null);
+        this.UpdateAsObservable()
+            .Where(_ => Input.GetMouseButton(0))
+            .Subscribe(x =>
+            {
+                if (GameEvents.instance.gameStarted.Value && !GameEvents.instance.gameLost.Value
+                && !GameEvents.instance.gameWon.Value)
+                {
+                    MovePlayer();
+                }
+            })
+            .AddTo(subscriptions);
+
+        GameEvents.instance.gameWon.ObserveEveryValueChanged(x => x.Value)
+            .Subscribe(value =>
+            {
+                if (value)
+                    lockControls = true;
+            })
+            .AddTo(subscriptions);
+
+        GameEvents.instance.gameLost.ObserveEveryValueChanged(x => x.Value)
+            .Subscribe(value =>
+            {
+                if (value)
+                    lockControls = true;
+            })
+            .AddTo(subscriptions);
+    }
+    private void OnDisable()
+    {
+        subscriptions.Clear();
+    }
+
     private void Update()
     {
+        //TODO: UI 생성
+        if(Input.GetKeyDown(KeyCode.K))
+            GameEvents.instance.gameStarted.SetValueAndForceNotify(true);
+
         MovePlayer();
 
-        // 현재 시간이 다음 발사 시간보다 클 경우 총알 발사
-        if (Time.time > nextFireTime)
+        if (GameEvents.instance.gameStarted.Value
+              && !GameEvents.instance.gameWon.Value && !GameEvents.instance.gameLost.Value)
         {
-            FireBullet();
-            nextFireTime = Time.time + 1.0f / fireRate; // 다음 발사 시간 업데이트
+            // 현재 시간이 다음 발사 시간보다 클 경우 총알 발사
+            if (Time.time > nextFireTime)
+            {
+                FireBullet();
+                nextFireTime = Time.time + 1.0f / GameEvents.instance.bulletFireRate.Value; // 다음 발사 시간 업데이트
+            }
         }
     }
 
