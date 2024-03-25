@@ -13,6 +13,10 @@ public class PlayerCollision : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
+        if(other.tag == "Finish")
+            GameEvents.instance.gameWon.SetValueAndForceNotify(true);
+        if (other.tag == "Gate")
+            other.GetComponent<Gate>().ExecuteOperation();
         if (other.tag == "BulletRate")
         {
             GameEvents.instance.bulletFireRate.Value += 1;
