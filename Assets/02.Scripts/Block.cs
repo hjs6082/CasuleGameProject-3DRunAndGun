@@ -26,7 +26,16 @@ public class Block : MonoBehaviour
     {
         int colorIndex = Random.Range(0,blockColor.Length);
         blockMesh.material = blockColor[colorIndex];
-    }
+
+        foreach (Transform child in brokenBlock.transform)
+        {
+            MeshRenderer meshRenderer = child.GetComponent<MeshRenderer>();
+            if (meshRenderer != null)
+            {
+                meshRenderer.material = blockColor[colorIndex];
+            }
+        }
+        }
 
     public void CheckHit()
     {

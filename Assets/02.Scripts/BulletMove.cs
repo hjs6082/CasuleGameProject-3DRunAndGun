@@ -1,8 +1,14 @@
 using UnityEngine;
+using System.Collections;
 
 public class BulletMove : MonoBehaviour
 {
     public float speed = 10.0f; // 총알 속도
+
+    private void Awake()
+    {
+        StartCoroutine(BulletRemoveCoroutine());
+    }
 
     void Update()
     {
@@ -10,15 +16,9 @@ public class BulletMove : MonoBehaviour
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
     }
 
-    private void OnBecameInvisible()
+    IEnumerator BulletRemoveCoroutine()
     {
+        yield return new WaitForSeconds(2f);
         Destroy(gameObject); // 화면 밖으로 나가면 총알 제거
-    }
-
-    // 이부분에 체력 다는 hp바 추가
-    private void OnCollisionEnter(Collision collision)
-    {
-        //Destroy(gameObject); // 물체에 닿으면 총알 제거.
-        // TODO 총알에 닿은 오브젝트 체력 감소
     }
 }
