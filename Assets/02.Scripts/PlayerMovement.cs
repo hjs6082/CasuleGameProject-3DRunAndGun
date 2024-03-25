@@ -62,10 +62,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        //TODO: UI 생성
-        if(Input.GetKeyDown(KeyCode.K))
-            GameEvents.instance.gameStarted.SetValueAndForceNotify(true);
-
         MovePlayer();
 
         if (GameEvents.instance.gameStarted.Value
@@ -92,16 +88,20 @@ public class PlayerMovement : MonoBehaviour
     //플레이어의 방향을 조절
     private void MovePlayer()
     {
-        if (Input.GetMouseButton(0))
+        if (GameEvents.instance.gameStarted.Value
+              && !GameEvents.instance.gameWon.Value && !GameEvents.instance.gameLost.Value)
         {
-            float percentageX = (Input.mousePosition.x - Screen.width / 2) / (Screen.width * 0.5f) * 2;
-            percentageX = Mathf.Clamp(percentageX, -1.0f, 1.0f);
-            _finalPos = percentageX * limitX;
-        }
+            if (Input.GetMouseButton(0))
+            {
+                float percentageX = (Input.mousePosition.x - Screen.width / 2) / (Screen.width * 0.5f) * 2;
+                percentageX = Mathf.Clamp(percentageX, -1.0f, 1.0f);
+                _finalPos = percentageX * limitX;
+            }
 
-        float delta = _finalPos - _currentPos;
-        _currentPos += (delta * Time.deltaTime * sidewaySpeed);
-        _currentPos = Mathf.Clamp(_currentPos, -limitX, limitX);
-        playerModel.localPosition = new Vector3(_currentPos, 0, 0);
+            float delta = _finalPos - _currentPos;
+            _currentPos += (delta * Time.deltaTime * sidewaySpeed);
+            _currentPos = Mathf.Clamp(_currentPos, -limitX, limitX);
+            playerModel.localPosition = new Vector3(_currentPos, 0, 0);
+        }
     }
 }
